@@ -47,7 +47,9 @@
   <ItemGroup>
     <Compile Include="Camera3D.cs" />
     <Compile Include="Face3D.cs" />
+    <Compile Include="Line3D.cs" />
     <Compile Include="Matrix3D.cs" />
+    <Compile Include="Plane3D.cs" />
     <Compile Include="Point3D.cs" />
     <Compile Include="Polygon3D.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -71,6 +71,39 @@ namespace D3.Solid3D
             return (value < (Math.PI / 2.0)) && value > (-Math.PI / 2.0);
 
         }
+		//public static bool operator ==(Face3D a, Face3D b)
+		//{
+		//	bool flag = true;
+		//	if(null == a.links)
+		//	{
+		//		return (null == b.links);
+		//	}
+		//	for (int i = 0; i < a.links.Length; i++)
+		//	{
+		//		if (a.links[i] != b.links[i])
+		//		{
+		//			flag = false;
+		//		}
+					
+		//	}
+		//	return flag;
+		//}
+		//public static bool operator !=(Face3D a, Face3D b)
+		//{
+		//	bool flag = false;
+		//	if (null == a.links)
+		//	{
+		//		return (null != b.links);
+		//	}
+		//	for (int i = 0; i < a.links.Length; i++)
+		//	{
+		//		if (a.links[i] != b.links[i])
+		//		{
+		//			flag = true;
+		//		}
 
-    }
+		//	}
+		//	return flag;
+		//}
+	}
 }

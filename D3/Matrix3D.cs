@@ -199,7 +199,7 @@ namespace D3.Matrix3DLib
             p.Y = y;
             p.Z = z;
         }
-        public void TransformPoints(Point3D[] points)
+        public Point3D[] TransformPoints(Point3D[] points)
         {
             float x, y, z;
             for (int i = 0; i<points.Length;i++)
@@ -212,6 +212,7 @@ namespace D3.Matrix3DLib
                 points[i].Y = y;
                 points[i].Z = z;
             }
+			return points;
         }
         public void TransformVector(ref Vector3D v)
         {
