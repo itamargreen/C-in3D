@@ -30,7 +30,7 @@
         {
 			this.button1 = new System.Windows.Forms.Button();
 			this.button2 = new System.Windows.Forms.Button();
-			this.comboBox1 = new System.Windows.Forms.ComboBox();
+			this.textBox1 = new System.Windows.Forms.TextBox();
 			this.SuspendLayout();
 			// 
 			// button1
@@ -55,24 +55,22 @@
 			this.button2.Click += new System.EventHandler(this.button2_Click);
 			this.button2.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
 			// 
-			// comboBox1
+			// textBox1
 			// 
-			this.comboBox1.FormattingEnabled = true;
-			this.comboBox1.Items.AddRange(new object[] {
-            "Points",
-            "Solids"});
-			this.comboBox1.Location = new System.Drawing.Point(671, 222);
-			this.comboBox1.SelectedIndex = 0;
-			this.comboBox1.Name = "comboBox1";
-			this.comboBox1.Size = new System.Drawing.Size(111, 21);
-			this.comboBox1.TabIndex = 2;
+			this.textBox1.Enabled = false;
+			this.textBox1.Location = new System.Drawing.Point(682, 191);
+			this.textBox1.Multiline = true;
+			this.textBox1.Name = "textBox1";
+			this.textBox1.ReadOnly = true;
+			this.textBox1.Size = new System.Drawing.Size(131, 157);
+			this.textBox1.TabIndex = 2;
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(846, 562);
-			this.Controls.Add(this.comboBox1);
+			this.Controls.Add(this.textBox1);
 			this.Controls.Add(this.button2);
 			this.Controls.Add(this.button1);
 			this.DoubleBuffered = true;
@@ -86,6 +84,7 @@
 			this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseMove);
 			this.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseWheel);
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
         }
 
@@ -93,7 +92,7 @@
 
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
-		private System.Windows.Forms.ComboBox comboBox1;
+		private System.Windows.Forms.TextBox textBox1;
 	}
 }
 
