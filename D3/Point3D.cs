@@ -58,6 +58,10 @@ namespace D3.Matrix3DLib
 			}
 			return new Point3D(x / vertices.Length, y / vertices.Length, z / vertices.Length);
 		}
+		public string ToString()
+		{
+			return "" + X + " " + Y + " " + Z;
+		}
 	}
 
 }

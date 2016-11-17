@@ -8,20 +8,20 @@ using System.Drawing;
 using D3.Vector3DLib;
 using D3.Matrix3DLib;
 using D3.Camera3DLib;
-using D3.Polygon3DLib;
-using Polygon2DLib;
+
 using D3.Solid3D;
 namespace Start3D
 {
 	static class Scene
 	{
 		private static Point3D[] points;
-		private static Polygon3D[] polygons;
 		private static Solid3D[] solids;
 		private static int selection = -1;
 		private static List<Solid3D> selected;
+		private static List<Face3D> selectedFaces;
 		private static List<Point3D> selectedPoints;
 		private static IEnumerable<Solid3D> solidsEn;
+		private static IDictionary<Face3D, Solid3D> faceMap = new Dictionary<Face3D, Solid3D>();
 		public static void Init()
 		{
 			float size = 70;
@@ -30,6 +30,7 @@ namespace Start3D
 			solidsEn = solids.AsEnumerable();
 			selected = new List<Solid3D>();
 			selectedPoints = new List<Point3D>();
+			selectedFaces = new List<Face3D>();
 
 		}
 		public static void AddSolid(PointF mouse, bool cylinder = false)
@@ -64,6 +65,10 @@ namespace Start3D
 			IDictionary<Solid3D, float> rankedSolids = new Dictionary<Solid3D, float>();
 			dump = "";
 			//middle = -1;
+
+
+
+
 			for (int i = 0; i < solids.Length; i++)
 			{
 				if (selected.Contains(solids[i]))
@@ -76,7 +81,11 @@ namespace Start3D
 				}
 				rankedSolids.Add(solids[i], solids[i].CameraDistance());
 			}
-			foreach(Point3D point in selectedPoints)
+			foreach (Face3D face in selectedFaces)
+			{
+				face.SetBrush(Brushes.Green);
+			}
+			foreach (Point3D point in selectedPoints)
 			{
 				PointF p = point.ToPointF(d);
 				gr.FillEllipse(Brushes.Blue, p.X - 5, p.Y - 5, 5, 5);
@@ -113,6 +122,15 @@ namespace Start3D
 			{
 				solid.Apply(m);
 			}
+			if (selectedFaces.Count != 0)
+			{
+				foreach(Face3D face in selectedFaces)
+				{
+					Solid3D s = solidsEn.ElementAt(0);
+					faceMap.TryGetValue(face, out s);
+					s.SetFaceVertices(s.GetIndex(face),m.TransformPoints(face.vertices));
+				}
+			}
 			if (selectedPoints.Count != 0)
 			{
 				Point3D[] selectP = selectedPoints.ToArray();
@@ -123,7 +141,7 @@ namespace Start3D
 
 		public static bool IsNothingSelected()
 		{
-			return (selected.Count == 0 && selectedPoints.Count==0);
+			return (selected.Count == 0 && selectedPoints.Count == 0 );
 		}
 		public static Point3D GetCenter()
 		{
@@ -180,6 +198,43 @@ namespace Start3D
 			}
 			return flag;
 		}
+		public static bool MouseAboveFace(PointF mouse, bool changeSelected = false)
+		{
+			bool flag = false;
+			solidsEn.OrderBy(solid => solid.CameraDistance());
+			for (int i = 0; i < solids.Length; i++)
+			{
+				if (null != solidsEn.ElementAt(i).GetSelectedFace(mouse))
+				{
+					if (!changeSelected)
+					{
+						Face3D selectee = solidsEn.ElementAt(i).GetSelectedFace(mouse);
+						selectedFaces.Add(selectee);
+						faceMap.Add(selectee, solidsEn.ElementAt(i));
+						//selected.Add(solidsEn.ElementAt(i));
+					}
+					else
+					{
+						selectedFaces.Clear();
+						faceMap.Clear();
+						//selected.Clear();
+						Face3D selectee = solidsEn.ElementAt(i).GetSelectedFace(mouse);
+						selectedFaces.Add(selectee);
+						faceMap.Add(selectee, solidsEn.ElementAt(i));
+						
+						//selected.Add(solidsEn.ElementAt(i));
+					}
+
+					flag = true;
+					break;
+				}
+				else
+				{
+				}
+
+			}
+			return flag;
+		}
 		public static bool MouseAbovePoint(PointF mouse, bool changeSelected = false)
 		{
 			bool flag = false;
@@ -224,6 +279,15 @@ namespace Start3D
 				}
 			}
 			SetSelection(-1);
+		}
+		public static string Dump()
+		{
+			string res = "";
+			foreach(Solid3D solid in solidsEn)
+			{
+				res += solid.ToString() + Environment.NewLine;
+			}
+			return res;
 		}
 	}
 }

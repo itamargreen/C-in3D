@@ -23,6 +23,7 @@ namespace D3.Solid3D
 		public float CameraDistance()
 		{
 			Vector3D camera = new Vector3D(Camera3DLib.Camera3D.GetCameraPoint(), GetCenter());
+
 			return camera.GetLength();
 		}
 		public void ClampVertices()
@@ -129,6 +130,22 @@ namespace D3.Solid3D
 			double value = (double)(perp ^ camera);
 			return (float)value;
 		}
+		public void SetFaceVertices(int index, params Point3D[] vertices)
+		{
+			Face3D face = GetFace(index);
+			if(face.links.Length != vertices.Length)
+			{
+				Console.Error.WriteLine("Invalid points!!");
+				return;
+			}
+			
+			for(int i = 0; i<face.links.Length; i++)
+			{
+				this.vertices[i] = vertices[i];	
+			}
+			
+			
+		}
 		public Point3D[] GetFaceVertices(int index)
 		{
 			Point3D[] points = new Point3D[4];
@@ -168,6 +185,20 @@ namespace D3.Solid3D
 		public Face3D GetFace(int i)
 		{
 			return faces[i];
+
+		}
+		public int GetIndex(Face3D face)
+		{
+			int index = -1;
+			for (int i = 0; i < faces.Length; i++)
+			{
+				if (faces[i] == face)
+				{
+					index = i;
+					break;
+				}
+			}
+			return index;
 		}
 		public Point3D[] GetRealPoints()
 		{
@@ -201,8 +232,8 @@ namespace D3.Solid3D
 			for (int i = 0; i < this.faces.Length; i++)
 			{
 
-				Vector3D zeroToOne = new Vector3D(verts[faces[i].links[0]], verts[faces[i].links[1]]);
-				Vector3D oneToTwo = new Vector3D(verts[faces[i].links[1]], verts[faces[i].links[2]]);
+				Vector3D zeroToOne = new Vector3D(vertices[faces[i].links[0]], vertices[faces[i].links[1]]);
+				Vector3D oneToTwo = new Vector3D(vertices[faces[i].links[1]], vertices[faces[i].links[2]]);
 				Vector3D perp = zeroToOne * oneToTwo;
 				float z = (perp).Z;
 				if (z > 0)
@@ -248,7 +279,8 @@ namespace D3.Solid3D
 			}
 			for (int i = 0; i < faces.Length; i++)
 			{
-
+				faces[i].SetVertices(GetFaceVertices(i));
+				
 				Vector3D zeroToOne = new Vector3D(verts[faces[i].links[0]], verts[faces[i].links[1]]);
 				Vector3D oneToTwo = new Vector3D(verts[faces[i].links[1]], verts[faces[i].links[2]]);
 				Vector3D perp = zeroToOne * oneToTwo;
@@ -311,7 +343,16 @@ namespace D3.Solid3D
 
 			return res;
 		}
-
+		
+		public override string ToString()
+		{
+			string res = "";
+			foreach(Point3D point in vertices)
+			{
+				res += point.ToString() + Environment.NewLine;
+			}
+			return res;
+		}
 		public void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			info.AddValue("vertices", vertices, vertices.GetType());
