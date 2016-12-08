@@ -15,10 +15,16 @@ namespace D3.Solid3D
         internal int[] links;
         internal Pen borderColor;
         internal Brush fillColor;
-        public void SetBrush(Brush b)
+		public Point3D[] vertices { get; set; }
+		public void SetBrush(Brush b)
         {
             this.fillColor = (Brush)b.Clone();
         }
+		public void SetVertices(params Point3D[] verts)
+		{
+			this.vertices = new Point3D[verts.Length];
+			Array.Copy(verts, this.vertices, verts.Length);
+		}
         public Face3D(params int[] links)
         {
             this.links = new int[links.Length];
