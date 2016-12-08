@@ -30,7 +30,7 @@
         {
 			this.button1 = new System.Windows.Forms.Button();
 			this.button2 = new System.Windows.Forms.Button();
-			this.comboBox1 = new System.Windows.Forms.ComboBox();
+			this.comboBox2 = new System.Windows.Forms.ComboBox();
 			this.SuspendLayout();
 			// 
 			// button1
@@ -46,7 +46,7 @@
 			// 
 			// button2
 			// 
-			this.button2.Location = new System.Drawing.Point(665, 117);
+			this.button2.Location = new System.Drawing.Point(683, 302);
 			this.button2.Name = "button2";
 			this.button2.Size = new System.Drawing.Size(98, 54);
 			this.button2.TabIndex = 1;
@@ -55,24 +55,25 @@
 			this.button2.Click += new System.EventHandler(this.button2_Click);
 			this.button2.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
 			// 
-			// comboBox1
+			// comboBox2
 			// 
-			this.comboBox1.FormattingEnabled = true;
-			this.comboBox1.Items.AddRange(new object[] {
-            "Points",
-            "Solids"});
-			this.comboBox1.Location = new System.Drawing.Point(671, 222);
-			this.comboBox1.SelectedIndex = 0;
-			this.comboBox1.Name = "comboBox1";
-			this.comboBox1.Size = new System.Drawing.Size(111, 21);
-			this.comboBox1.TabIndex = 2;
+			this.comboBox2.FormattingEnabled = true;
+			this.comboBox2.Items.AddRange(new object[] {
+            "Cube",
+            "Cylinder",
+            "Pyramid",
+            "Sphere"});
+			this.comboBox2.Location = new System.Drawing.Point(671, 264);
+			this.comboBox2.Name = "comboBox2";
+			this.comboBox2.Size = new System.Drawing.Size(110, 21);
+			this.comboBox2.TabIndex = 3;
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(846, 562);
-			this.Controls.Add(this.comboBox1);
+			this.Controls.Add(this.comboBox2);
 			this.Controls.Add(this.button2);
 			this.Controls.Add(this.button1);
 			this.DoubleBuffered = true;
@@ -93,7 +94,7 @@
 
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
-		private System.Windows.Forms.ComboBox comboBox1;
+		private System.Windows.Forms.ComboBox comboBox2;
 	}
 }
 

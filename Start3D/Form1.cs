@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using D3.Camera3DLib;
+using System.Threading;
 
 namespace Start3D
 {
@@ -19,54 +20,81 @@ namespace Start3D
 		public Form1()
 		{
 			InitializeComponent();
+
 			Scene.Init();
+			System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
+			timer.Tick += Timer_Tick;
+			
+			timer.Interval = 10;
+			timer.Start();
+			Application.DoEvents();
 		}
 
+		private void Timer_Tick(object sender, EventArgs e)
+		{
+			Scene.Update();
+			Refresh();
+		}
+
+		
 		private void Form1_MouseDown(object sender, MouseEventArgs e)
 		{
 			xStart = e.X;
-
+			Scene.SolidTypes createType = Scene.SolidTypes.Cube;
+			if (creatingSolid)
+			{
+				if (comboBox2.SelectedItem != null)
+				{
+					string text = comboBox2.SelectedItem.ToString();
+					switch (text)
+					{
+						case "Cube":
+							createType = Scene.SolidTypes.Cube;
+							break;
+						case "Sphere":
+							createType = Scene.SolidTypes.Sphere;
+							break;
+						case "Pyramid":
+							createType = Scene.SolidTypes.Pyramid;
+							break;
+						case "Cylinder":
+							createType = Scene.SolidTypes.Cylinder;
+							break;
+						default:
+							createType = Scene.SolidTypes.Cube;
+							break;
+					}
+				}
+			}
 			yStart = e.Y;
 			if (e.Button == MouseButtons.Left && creatingSolid)
 			{
-				Scene.AddSolid(new PointF(e.Location.X - xOffset, -(e.Location.Y - yOffset)));
+				Scene.AddSolid(new PointF(e.Location.X - xOffset, -(e.Location.Y - yOffset)), createType);
 				creatingSolid = false;
 			}
-			else if (e.Button == MouseButtons.Left && creatingCylinder)
-			{
-				Scene.AddSolid(new PointF(e.Location.X - xOffset, -(e.Location.Y - yOffset)), true);
-				creatingCylinder = false;
-			}
+
 			else if (e.Button == MouseButtons.Right && (ModifierKeys == Keys.None))
 			{
-				if (this.comboBox1.SelectedIndex == 1)
-					if (Scene.MouseAboveSolid(new PointF(e.Location.X - xOffset, -(e.Location.Y - yOffset))))
-					{
 
-					}
-					else
-					{
-						Scene.SetSelection(-1);
-					}
-				else if (this.comboBox1.SelectedIndex == 0)
+				if (Scene.MouseAboveSolid(new PointF(e.Location.X - xOffset, -(e.Location.Y - yOffset))))
 				{
-					Scene.MouseAbovePoint(new PointF(e.Location.X - xOffset, -(e.Location.Y - yOffset)));
 
 				}
+				else
+				{
+					Scene.SetSelection(-1);
+				}
+
 			}
 			if (e.Button == MouseButtons.Right && (ModifierKeys == Keys.Shift))
 			{
-				if (this.comboBox1.SelectedIndex == 1)
 
-					Scene.MouseAboveSolid(new PointF(e.Location.X - xOffset, -(e.Location.Y - yOffset)), true);
+				Scene.MouseAboveSolid(new PointF(e.Location.X - xOffset, -(e.Location.Y - yOffset)), false);
 
-				else if (this.comboBox1.SelectedIndex == 0)
-				{
-					Scene.MouseAbovePoint(new PointF(e.Location.X - xOffset, -(e.Location.Y - yOffset)));
-				}
+
 
 			}
-			
+
 			Invalidate();
 		}
 		private void Form1_MouseMove(object sender, MouseEventArgs e)
@@ -185,13 +213,13 @@ namespace Start3D
 			}
 
 
-
+			
 			Matrix m = new Matrix();
 			m.Scale(1, -1);
 			m.Translate(xOffset, yOffset, MatrixOrder.Append); ;
 			gr.Transform = m;
 			Scene.Draw(gr);
-
+			Scene.Update();
 
 		}
 		private float xOffset = 300;
@@ -237,7 +265,7 @@ namespace Start3D
 
 		private void button2_Click(object sender, EventArgs e)
 		{
-			creatingCylinder = true;
+			creatingSolid = true;
 		}
 
 		private void Form1_DragDrop(object sender, DragEventArgs e)

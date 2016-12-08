@@ -199,6 +199,16 @@ namespace D3.Matrix3DLib
             p.Y = y;
             p.Z = z;
         }
+		public Point3D TransformPoint(Point3D p)
+		{
+			float x = p.X * m11 + p.Y * m21 + p.Z * m31 + m41;
+			float y = p.X * m12 + p.Y * m22 + p.Z * m32 + m42;
+			float z = p.X * m13 + p.Y * m23 + p.Z * m33 + m43;
+			p.X = x;
+			p.Y = y;
+			p.Z = z;
+			return p;
+		}
         public Point3D[] TransformPoints(Point3D[] points)
         {
             float x, y, z;

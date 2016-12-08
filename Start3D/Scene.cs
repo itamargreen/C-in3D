@@ -22,32 +22,47 @@ namespace Start3D
 		private static List<Solid3D> selected;
 		private static List<Point3D> selectedPoints;
 		private static IEnumerable<Solid3D> solidsEn;
+		public enum SolidTypes { Cube, Sphere, Pyramid, Cylinder };
 		public static void Init()
 		{
 			float size = 70;
-			solids = new Solid3D[1];
+			solids = new Solid3D[2];
 			solids[0] = Solid3D.GetCube(size, -size / 2, -size / 2, 0);
+			solids[1] = Solid3D.GetCube(size, -size / 2, size / 2, 0);
 			solidsEn = solids.AsEnumerable();
 			selected = new List<Solid3D>();
 			selectedPoints = new List<Point3D>();
 
 		}
-		public static void AddSolid(PointF mouse, bool cylinder = false)
+		public static void AddSolid(PointF mouse, SolidTypes type)
 		{
 			Solid3D[] solidsTemp = new Solid3D[solids.Length + 1];
 			Array.Copy(solids, solidsTemp, solids.Length);
-			if (!cylinder)
+			if (type == SolidTypes.Cube)
 			{
 				mouse.X = 10.0f * ((int)mouse.X / 10);
 				mouse.Y = 10.0f * ((int)mouse.Y / 10);
 				solidsTemp[solids.Length] = Solid3D.GetCube(70, mouse.X, mouse.Y);
 			}
-			else
+			else if (type == SolidTypes.Cylinder)
 			{
 				mouse.X = 10.0f * ((int)mouse.X / 10);
 				mouse.Y = 10.0f * ((int)mouse.Y / 10);
-				solidsTemp[solids.Length] = Solid3D.GetCylinder(65, 100, mouse.X, mouse.Y);
+				solidsTemp[solids.Length] = Solid3D.GetCylinder(65, 100, 10, mouse.X, mouse.Y);
 			}
+			else if (type == SolidTypes.Pyramid)
+			{
+				mouse.X = 10.0f * ((int)mouse.X / 10);
+				mouse.Y = 10.0f * ((int)mouse.Y / 10);
+				solidsTemp[solids.Length] = Solid3D.GetPyramid(65, 100, 5, mouse.X, mouse.Y);
+			}
+			else if (type == SolidTypes.Sphere)
+			{
+				mouse.X = 10.0f * ((int)mouse.X / 10);
+				mouse.Y = 10.0f * ((int)mouse.Y / 10);
+				solidsTemp[solids.Length] = Solid3D.GetSphere(50, 18, mouse.X, mouse.Y);
+			}
+
 
 			solids = new Solid3D[solids.Length + 1];
 			Array.Copy(solidsTemp, solids, solidsTemp.Length);
@@ -76,7 +91,7 @@ namespace Start3D
 				}
 				rankedSolids.Add(solids[i], solids[i].CameraDistance());
 			}
-			foreach(Point3D point in selectedPoints)
+			foreach (Point3D point in selectedPoints)
 			{
 				PointF p = point.ToPointF(d);
 				gr.FillEllipse(Brushes.Blue, p.X - 5, p.Y - 5, 5, 5);
@@ -101,11 +116,45 @@ namespace Start3D
 			{
 				if (i != selection)
 				{
+
 					solids[i].SetFillColor(Brushes.White);
 					solids[i].Apply(m);
 				}
 
 			}
+		}
+		public static bool CheckCollision(Solid3D s, Matrix3D m)
+		{
+			Point3D[] afterTransform = m.TransformPoints(s.GetVertices());
+			Solid3D temp = new Solid3D(afterTransform, s.GetFaces());
+			IDictionary<Face3D, float> dotProducts = new Dictionary<Face3D, float>();
+			List<float> dotPro = new List<float>();
+
+			for (int i = 0; i < temp.GetFaces().Length; i++)
+			{
+				Face3D face = temp.GetFaces()[i];
+				Vector3D toFace = new Vector3D(temp.GetFaceCenter(face), temp.GetCenter());
+				float val = toFace ^ temp._velocity;
+				dotPro.Add(val);
+				dotProducts.Add(face, val);
+			}
+			dotPro.Where(x => (x < 0)).OrderBy(x => x);
+			var rightFaces = dotProducts.Where(x => (x.Value < 0)).OrderBy(d => d.Value).AsEnumerable();
+			foreach (Solid3D solid in solids)
+			{
+				if (solid == s)
+					continue;
+
+				Face3D theFace = rightFaces.ElementAt(0).Key;
+
+				Vector3D dist = new Vector3D(solid.GetCenter(), temp.GetFaceCenter(theFace));
+				if (dist.GetLength() < 10)
+				{
+					return false;
+				}
+
+			}
+			return true;
 		}
 		public static void ApplySelection(Matrix3D m)
 		{
@@ -123,7 +172,7 @@ namespace Start3D
 
 		public static bool IsNothingSelected()
 		{
-			return (selected.Count == 0 && selectedPoints.Count==0);
+			return (selected.Count == 0 && selectedPoints.Count == 0);
 		}
 		public static Point3D GetCenter()
 		{
@@ -151,6 +200,38 @@ namespace Start3D
 				return Point3D.GetCenter(centers);
 			}
 
+		}
+		public static bool UnderZero(Solid3D s,Matrix3D mat2)
+		{
+			Point3D[] temp = new Point3D[s.GetRealPoints().Length];
+			Array.Copy(s.GetRealPoints(), temp, s.GetRealPoints().Length);
+			foreach (Point3D point in temp)
+			{
+				if (mat2.TransformPoint(point).Y <= -50)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		public static void Update()
+		{
+			Vector3D gravity = new Vector3D(0, -0.005f, 0);
+			foreach (Solid3D solid in solids)
+			{
+				Vector3D velTemp = gravity + solid._velocity;
+				Matrix3D mat2 = Matrix3D.Translate(velTemp.X, velTemp.Y, velTemp.Z);
+				//Console.WriteLine(CheckCollision(solid, mat2) + "");
+				if (UnderZero(solid, mat2))
+				{
+					continue;
+				}
+				if (CheckCollision(solid, mat2))
+				{
+					solid.UpdateVelocity(gravity);
+				}
+
+			}
 		}
 		public static bool MouseAboveSolid(PointF mouse, bool changeSelected = false)
 		{
