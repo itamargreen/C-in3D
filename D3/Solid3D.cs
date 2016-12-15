@@ -18,8 +18,13 @@ namespace D3.Solid3D
 		public enum Direction { XAxis, YAxis, ZAxis };
 		private Point3D[] vertices;
 		private Face3D[] faces;
-
+		public Vector3D _velocity { get; set; }
+		
 		private Brush fillColor;
+		public Face3D[] GetFaces()
+		{
+			return faces;
+		}
 		public float CameraDistance()
 		{
 			Vector3D camera = new Vector3D(Camera3DLib.Camera3D.GetCameraPoint(), GetCenter());
@@ -43,39 +48,143 @@ namespace D3.Solid3D
 			this.faces = new Face3D[faces.Length];
 			Array.Copy(faces, this.faces, faces.Length);
 			fillColor = Brushes.White;
+			this._velocity = new Vector3D(0, 0, 0);
 		}
-		public static Solid3D GetCylinder(float r, float h, float offsetX = 0, float offsetY = 0, float offsetZ = 0)
+
+		public static Solid3D GetSphere(float r, int pPBase, float offsetX = 0, float offsetY = 0, float offsetZ = 0)
 		{
-			Point3D[] vertices = new Point3D[12];
-			Face3D[] faces = new Face3D[8];
-			for (int i = 0; i < 6; i++)
+			int nParallels = (pPBase - 2) / 2;
+			int nVerts = 2 + pPBase * nParallels;
+			Point3D[] vertices = new Point3D[nVerts];
+			int nFaces = 2 * pPBase + (nParallels - 1) * pPBase;
+			Face3D[] faces = new Face3D[nFaces];
+			Matrix3D mZ = Matrix3D.ZRotate((float)(2 * Math.PI / pPBase));
+			Matrix3D mY = Matrix3D.YRotate((float)(2 * Math.PI / pPBase));
+			int i, j, ind;
+			Point3D p = new Point3D(0, r, 0);
+			vertices[0] = p;
+			for (i = 0; i < nParallels; i++)
 			{
-				double temp = 2 * Math.PI / 6 * i;
-				float x = r * (float)Math.Sin((temp));
-				float y = r * (float)Math.Cos((temp));
-				vertices[i] = new Point3D(x + offsetX, y + offsetY, offsetZ);
-			}
-			for (int i = 6; i < 12; i++)
-			{
-				double temp = 2 * Math.PI / 6 * (i - 6);
-				float x = r * (float)Math.Sin((temp));
-				float y = r * (float)Math.Cos((temp));
-				vertices[i] = new Point3D(x + offsetX, y + offsetY, h + offsetZ);
-			}
-			faces[1] = new Face3D(7, 8, 9, 10, 11, 6);
-			faces[0] = new Face3D(1, 0, 5, 4, 3, 2);
-			for (int j = 2; j < faces.Length; j++)
-			{
-				int i = j - 2;
-				if (j == faces.Length - 1)
+				p = p * mZ;
+				for (j = 0; j < pPBase; j++)
 				{
-					faces[j] = new Face3D(i % (vertices.Length / 2), (i + 1) % (vertices.Length / 2), vertices.Length / 2, i + 6);
-					continue;
+					vertices[1 + i * pPBase + j] = p;
+					p = p * mY;
 				}
-				faces[j] = new Face3D(i % (vertices.Length / 2), (i + 1) % (vertices.Length / 2), (i + 7) % (vertices.Length), i + 6);
+			}
+			vertices[nVerts - 1] = new Point3D(0, -r, 0);
+			////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			for (i = 0; i < pPBase; i++)
+			{
+				//*************** Up Faces ******************************
+				faces[i] = new Face3D(new int[3] { 0, i + 1, (i + 1) % pPBase + 1 });
+				//*************** Down Faces ****************************
+				faces[i + pPBase] = new Face3D(new int[3]
+				{ nVerts - 1 - pPBase + i, nVerts - 1, nVerts - 1 - pPBase + (i + 1) % pPBase });
+			}
+			for (i = 0; i < nParallels - 1; i++)
+			{
+				ind = 2 * pPBase + i * pPBase;
+				for (j = 0; j < pPBase; j++)
+				{
+					faces[ind + j] = new Face3D(new int[4]
+					{ i * pPBase + j + 1, i * pPBase + j + 1 + pPBase, i * pPBase + (j + 1) % pPBase + 1 + pPBase, i * pPBase + (j + 1) % pPBase + 1 });
+				}
+
+			}
+			for (int k = 0; i < vertices.Length; i++)
+			{
+				Point3D point = vertices[k];
+				point.X += offsetX;
+				point.Y += offsetY;
+				point.Z += offsetZ;
+			}
+
+
+
+
+			return new Solid3D(vertices, faces);
+		}
+		public static Solid3D GetPyramid(float r, float h, int pPBase, float offsetX = 0, float offsetY = 0, float offsetZ = 0)
+		{
+			int nVerts = pPBase + 1;
+			Point3D[] vertices = new Point3D[nVerts];
+			int nFaces = 1 + pPBase;
+			Face3D[] faces = new Face3D[nFaces];
+			Matrix3D mY = Matrix3D.YRotate((float)(2 * Math.PI / pPBase));
+			Point3D p = new Point3D(r + offsetX, offsetY, offsetZ);
+			int[] baseLinks = new int[pPBase];
+			for (int i = 0; i < pPBase; i++)
+			{
+				vertices[i] = p;
+				p = p * mY;
+				baseLinks[i] = pPBase - 1 - i;
+				faces[i + 1] = new Face3D(new int[3]
+				{ i, (i + 1) % pPBase, pPBase });
+			}
+			vertices[nVerts - 1] = new Point3D(0 + offsetX, h + offsetY, offsetZ);
+			faces[0] = new Face3D(baseLinks);
+			return new Solid3D(vertices, faces);
+		}
+		public static Solid3D GetCylinder(float r, float h, int pPBase, float offsetX = 0, float offsetY = 0, float offsetZ = 0)
+		{
+			int nVerts = 2 * pPBase;
+			Point3D[] vertices = new Point3D[nVerts];
+			int nFaces = 2 + pPBase;
+			Face3D[] faces = new Face3D[nFaces];
+			Matrix3D mY = Matrix3D.YRotate((float)(2 * Math.PI / pPBase));
+			Point3D p1 = new Point3D(r + offsetX, offsetY, offsetZ);
+			Point3D p2 = new Point3D(r + offsetX, h + offsetY, offsetZ);
+			int[] downBaseLinks = new int[pPBase];
+			int[] upBaseLinks = new int[pPBase];
+			for (int i = 0; i < pPBase; i++)
+			{
+				vertices[i] = p1;
+				vertices[i + pPBase] = p2;
+				p1 = p1 * mY;
+				p2 = p2 * mY;
+				downBaseLinks[i] = pPBase - 1 - i;
+				upBaseLinks[i] = pPBase + i;
+				faces[i + 2] = new Face3D(new int[4]
+				{ i, (i + 1) % pPBase, (i + 1) % pPBase + pPBase, i + pPBase });
+			}
+			faces[0] = new Face3D(downBaseLinks);
+			faces[1] = new Face3D(upBaseLinks);
+			return new Solid3D(vertices, faces);
+		}
+		public static Solid3D GetHollowCylinder(float rBig, float rSmall, float h, int pPBase, float offsetX = 0, float offsetY = 0, float offsetZ = 0)
+		{
+			int nVerts = 4 * pPBase;
+			Point3D[] vertices = new Point3D[nVerts];
+			int nFaces = 4 * pPBase;
+			Face3D[] faces = new Face3D[nFaces];
+			Matrix3D mY = Matrix3D.YRotate((float)(2 * Math.PI / pPBase));
+			Point3D p1 = new Point3D(rBig + offsetX, offsetY, offsetZ);
+			Point3D p2 = new Point3D(rSmall + offsetX, offsetY, offsetZ);
+			for (int i = 0; i < pPBase; i++)
+			{
+				// Small Sylinder;
+				vertices[i] = p2;
+				vertices[i + pPBase] = new Point3D(p2.X + offsetX, h + offsetY, p2.Z + offsetZ);
+				// Big Sylinder;
+				vertices[i + 2 * pPBase] = p1;
+				vertices[i + 3 * pPBase] = new Point3D(p1.Y + offsetX, h + offsetY, p1.Y + offsetZ);
+				p1 = p1 * mY;
+				p2 = p2 * mY;
+				// Inner Faces in small radius of Small Sylinder
+				faces[i] = new Face3D(new int[4]
+				{ (i + 1) % pPBase, i, i + pPBase, (i + 1) % pPBase + pPBase });
+				//  Back Faces in big radius Of Big Cylinder
+				faces[i + pPBase] = new Face3D(new int[4]
+				{ i + 2 * pPBase, (i + 1) % pPBase + 2 * pPBase, (i + 1) % pPBase + pPBase + 2 * pPBase, i + pPBase + 2 * pPBase });
+				// Down base Faces
+				faces[i + 2 * pPBase] = new Face3D(new int[4]
+                // Up base Faces
+                { i, (i + 1) % pPBase, (i + 1) % pPBase + 2 * pPBase, i + 2 * pPBase });
+				faces[i + 3 * pPBase] = new Face3D(new int[4]
+				{ (i + 1) % pPBase + pPBase, i + pPBase, i + 3 * pPBase, (i + 1) % pPBase + 3 * pPBase });
 			}
 			return new Solid3D(vertices, faces);
-
 		}
 		public Point3D GetCenter()
 		{
@@ -232,8 +341,8 @@ namespace D3.Solid3D
 			for (int i = 0; i < this.faces.Length; i++)
 			{
 
-				Vector3D zeroToOne = new Vector3D(vertices[faces[i].links[0]], vertices[faces[i].links[(faces[i].links.Length / 2)]]);
-				Vector3D oneToTwo = new Vector3D (vertices[faces[i].links[(faces[i].links.Length / 2)-1]], vertices[faces[i].links[(faces[i].links.Length - 1)]]);
+				Vector3D zeroToOne = new Vector3D(vertices[faces[i].links[0]], vertices[faces[i].links[1]]);
+				Vector3D oneToTwo = new Vector3D(vertices[faces[i].links[1]], vertices[faces[i].links[2]]);
 				Vector3D perp = zeroToOne * oneToTwo;
 				float z = (perp).Z;
 				if (z > 0)
@@ -249,7 +358,6 @@ namespace D3.Solid3D
 					gr.DrawPolygon(faces[i].borderColor, points);
 				}
 			}
-
 		}
 		public void SetFillColor(Brush b)
 		{
@@ -259,9 +367,38 @@ namespace D3.Solid3D
 			}
 
 		}
+		
+		public void UpdateVelocity(Vector3D vect)
+		{
+			Vector3D velTemp = vect + this._velocity;
+			
+			Matrix3D mat2 = Matrix3D.Translate(velTemp.X, velTemp.Y, velTemp.Z);
+			
+			Point3D[] temp = new Point3D[this.vertices.Length];
+			Array.Copy(this.vertices, temp,this.vertices.Length);
+            foreach (Point3D point in temp)
+			{
+				if (mat2.TransformPoint(point).Y <= -50)
+				{
+					return;
+				}
+			}
+			this._velocity = velTemp;
+			mat2.TransformPoints(this.vertices);
+
+		}
+
 		public void Apply(Matrix3D m)
 		{
-
+			Point3D[] temp = new Point3D[this.vertices.Length];
+			Array.Copy(this.vertices, temp, this.vertices.Length);
+			foreach (Point3D point in temp)
+			{
+				if (m.TransformPoint(point).Y <= -50)
+				{
+					return;
+				}
+			}
 			m.TransformPoints(this.vertices);
 			ClampVertices();
 		}
