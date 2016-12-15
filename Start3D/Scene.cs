@@ -8,15 +8,15 @@ using System.Drawing;
 using D3.Vector3DLib;
 using D3.Matrix3DLib;
 using D3.Camera3DLib;
-using D3.Polygon3DLib;
-using Polygon2DLib;
+
+
 using D3.Solid3D;
 namespace Start3D
 {
 	static class Scene
 	{
 		private static Point3D[] points;
-		private static Polygon3D[] polygons;
+
 		private static Solid3D[] solids;
 		private static int selection = -1;
 		private static List<Solid3D> selected;

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using D3.Matrix3DLib;
-using Polygon2DLib;
+
 namespace D3.Polygon3DLib
 {
     public class Polygon3D
