@@ -16,11 +16,11 @@ namespace Start3D
 {
 	public partial class Form1 : Form
 	{
-		private float xStart, yStart;
+		private float xStart, yStart, xFinish;
 		public Form1()
 		{
+			xFinish = 0.89f;
 			InitializeComponent();
-
 			Scene.Init();
 			System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
 			timer.Tick += Timer_Tick;
