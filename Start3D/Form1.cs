@@ -25,7 +25,7 @@ namespace Start3D
 			System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
 			timer.Tick += Timer_Tick;
 			
-			timer.Interval = 10;
+			timer.Interval = 101;
 			timer.Start();
 			Application.DoEvents();
 		}
